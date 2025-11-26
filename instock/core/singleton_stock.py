@@ -28,7 +28,15 @@ class stock_data(metaclass=singleton_type):
 class stock_hist_data(metaclass=singleton_type):
     def __init__(self, date=None, stocks=None, workers=16):
         if stocks is None:
-            _subset = stock_data(date).get_data()[list(tbs.TABLE_CN_STOCK_FOREIGN_KEY['columns'])]
+            #_subset = stock_data(date).get_data()[list(tbs.TABLE_CN_STOCK_FOREIGN_KEY['columns'])]
+            #2025.11.26采用deepseek建议修改代码
+            data = stock_data(date).get_data()
+            if data is None:
+                # 处理空数据情况，可以记录日志、跳过或使用默认值
+                print(f"警告: 在日期 {date} 未获取到股票数据")
+                _subset = None  # 或者空的DataFrame，根据后续代码决定
+            else:
+                _subset = data[list(tbs.TABLE_CN_STOCK_FOREIGN_KEY['columns'])]
             stocks = [tuple(x) for x in _subset.values]
         if stocks is None:
             self.data = None
