@@ -58,8 +58,8 @@ trusted-host = mirrors.aliyun.com" > /etc/pip.conf && \
 WORKDIR /data
 #InStock软件
 #修改stock文件夹为instock，添加supervisor文件夹至/data/InStock
-COPY instock /data/InStock
-COPY supervisor /data/InStock
+COPY instock /data/InStock/instock
+COPY supervisor /data/InStock/supervisor
 COPY cron/cron.hourly /etc/cron.hourly
 COPY cron/cron.workdayly /etc/cron.workdayly
 COPY cron/cron.monthly /etc/cron.monthly
