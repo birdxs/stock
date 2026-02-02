@@ -5,11 +5,18 @@ Date: 2022/3/15 17:32
 Desc: 东方财富网-数据中心-龙虎榜单
 https://data.eastmoney.com/stock/tradedetail.html
 """
-import pandas as pd
-import requests
-from tqdm import tqdm
-from instock.core.singleton_proxy import proxys
+import random
+import time
 
+import pandas as pd
+from tqdm import tqdm
+from instock.core.eastmoney_fetcher import eastmoney_fetcher
+
+__author__ = 'myh '
+__date__ = '2025/12/31 '
+
+# 创建全局实例，供所有函数使用
+fetcher = eastmoney_fetcher()
 
 def stock_lhb_detail_em(
     start_date: str = "20230403", end_date: str = "20230417"
@@ -38,25 +45,28 @@ def stock_lhb_detail_em(
         "client": "WEB",
         "filter": f"(TRADE_DATE<='{end_date}')(TRADE_DATE>='{start_date}')",
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     total_page_num = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in range(1, total_page_num + 1):
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         params.update(
             {
                 "pageNumber": page,
             }
         )
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
+
     big_df.reset_index(inplace=True)
     big_df["index"] = big_df.index + 1
     big_df.rename(
         columns={
-            "index": "序号",
+            "index": "-",
             "SECURITY_CODE": "代码",
             "SECUCODE": "-",
             "SECURITY_NAME_ABBR": "名称",
@@ -84,7 +94,6 @@ def stock_lhb_detail_em(
 
     big_df = big_df[
         [
-            "序号",
             "代码",
             "名称",
             "上榜日",
@@ -154,7 +163,7 @@ def stock_lhb_stock_statistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICS_CYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -241,7 +250,7 @@ def stock_lhb_jgmmtj_em(
         "client": "WEB",
         "filter": f"(TRADE_DATE>='{start_date}')(TRADE_DATE<='{end_date}')",
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -337,16 +346,19 @@ def stock_lhb_jgstatistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         params.update({"pageNumber": page})
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
+
     big_df.reset_index(inplace=True)
     big_df["index"] = big_df.index + 1
     big_df.rename(
@@ -434,17 +446,20 @@ def stock_lhb_hyyyb_em(
         "client": "WEB",
         "filter": f"(ONLIST_DATE>='{start_date}')(ONLIST_DATE<='{end_date}')",
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
 
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         params.update({"pageNumber": page})
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
+
     big_df.reset_index(inplace=True)
     big_df["index"] = big_df.index + 1
     big_df.columns = [
@@ -512,16 +527,19 @@ def stock_lhb_yybph_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         params.update({"pageNumber": page})
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
+
     big_df.reset_index(inplace=True)
     big_df["index"] = big_df.index + 1
     big_df.rename(
@@ -617,16 +635,19 @@ def stock_lhb_traderstatistic_em(symbol: str = "近一月") -> pd.DataFrame:
         "client": "WEB",
         "filter": f'(STATISTICSCYCLE="{symbol_map[symbol]}")',
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     total_page = data_json["result"]["pages"]
     big_df = pd.DataFrame()
     for page in tqdm(range(1, total_page + 1), leave=False):
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         params.update({"pageNumber": page})
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         temp_df = pd.DataFrame(data_json["result"]["data"])
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
+
     big_df.reset_index(inplace=True)
     big_df["index"] = big_df.index + 1
     big_df.rename(
@@ -685,7 +706,7 @@ def stock_lhb_stock_detail_date_em(symbol: str = "600077") -> pd.DataFrame:
         "source": "WEB",
         "client": "WEB",
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)
@@ -743,7 +764,7 @@ def stock_lhb_stock_detail_em(
         "client": "WEB",
         "_": "1647338693644",
     }
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["result"]["data"])
     temp_df.reset_index(inplace=True)

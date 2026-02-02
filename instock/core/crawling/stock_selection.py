@@ -2,15 +2,17 @@
 # !/usr/bin/env python
 
 import math
+import random
+import time
 import pandas as pd
-import requests
 import instock.core.tablestructure as tbs
-from instock.core.singleton_proxy import proxys
-
+from instock.core.eastmoney_fetcher import eastmoney_fetcher
 
 __author__ = 'myh '
-__date__ = '2023/5/9 '
+__date__ = '2025/12/31 '
 
+# 创建全局实例，供所有函数使用
+fetcher = eastmoney_fetcher()
 
 def stock_selection() -> pd.DataFrame:
     """
@@ -35,7 +37,7 @@ def stock_selection() -> pd.DataFrame:
         "client": "WEB"
     }
 
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     data = data_json["result"]["data"]
     if not data:
@@ -44,9 +46,11 @@ def stock_selection() -> pd.DataFrame:
     data_count = data_json["result"]["count"]
     page_count = math.ceil(data_count/page_size)
     while page_count > 1:
+        # 添加随机延迟，避免爬取过快
+        time.sleep(random.uniform(1, 1.5))
         page_current = page_current + 1
         params["p"] = page_current
-        r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+        r = fetcher.make_request(url, params=params)
         data_json = r.json()
         _data = data_json["result"]["data"]
         data.extend(_data)
@@ -86,7 +90,7 @@ def stock_selection_params():
         "client": "WEB"
     }
 
-    r = requests.get(url, proxies = proxys().get_proxies(), params=params)
+    r = fetcher.make_request(url, params=params)
     data_json = r.json()
     zxzb = data_json["result"]["data"]  # 指标
     print(zxzb)

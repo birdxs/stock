@@ -45,11 +45,36 @@
             </a>
             <b class="arrow"></b>
         </li>
+        {% set isOpenStr = "" %}
+        {% try %}
+            {% if request.uri == "/" or request.uri == "/instock/" %}
+                {% set isOpenStr = "open" %}
+            {% end %}
+        {% except %}
+        {% end %}
+        <li class="{{ isOpenStr }}">
+            <a href="#" class="dropdown-toggle">
+                <i class="menu-icon fa fa-desktop"></i>
+                <span class="menu-text">ima知识库</span>
+                <b class="arrow fa fa-angle-down"></b>
+            </a>
+            <b class="arrow"></b>
+            <ul class="submenu">
+                <li class="active">
+                    <a href="/">
+                        <i class="menu-icon fa fa-caret-right"></i>
+                        myhhub/stock知识库
+                    </a>
+                    <b class="arrow"></b>
+                </li>
+            </ul>
+        </li>
 {% set loopType = "" %}
 {% for leftMenuTmp in leftMenu.leftMenuList %}
     {% if leftMenuTmp.type != loopType %}
         {% if loopType != "" %}
             </ul>
+            </li>
         {% end %}
         {% set loopType = leftMenuTmp.type %}
         {% set isOpenStr = "" %}
